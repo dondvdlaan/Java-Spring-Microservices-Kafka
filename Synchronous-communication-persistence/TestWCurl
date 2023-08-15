@@ -1,0 +1,9 @@
+- curl -X 'POST' \
+  'http://localhost:8080/addProduct' \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "prodID": 20,
+  "prodDesc": "Vierkante erwten",
+  "prodWeight": 15,
+  "trackingID": "<nothingToSeeHere>"
+}'

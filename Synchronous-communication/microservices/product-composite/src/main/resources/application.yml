@@ -1,0 +1,20 @@
+server.port: 7000
+
+SCHEME: http
+PROD_SERVICE_HOST: localhost
+PROD_SERVICE_PORT: 7001
+PROD_RECOMMENDATION_HOST: localhost
+PROD_RECOMMENDATION_PORT: 7003
+
+---
+spring:
+  config:
+    activate:
+      on-profile: docker
+server.port: 8080
+
+SCHEME: http
+PROD_SERVICE_HOST: product
+PROD_SERVICE_PORT: 8080
+PROD_RECOMMENDATION_HOST: recommendation
+PROD_RECOMMENDATION_PORT: 8080

@@ -1,0 +1,19 @@
+- curl -X 'POST' \
+  'http://localhost:8080/addProduct' \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "prodID": 40,
+  "prodDesc": "Vierkante erwten",
+  "prodWeight": 15,
+  "trackingID": "<nothingToSeeHere>"
+}'
+
+curl -X 'POST' \
+  'http://localhost:8080/addRecommendation' \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "prodID": 40,
+  "recomID": 41,
+  "recomDescription": "Mooiste erwten van de stad",
+  "trackingID": "<nothingToSeeHere>"
+}'

@@ -1,0 +1,27 @@
+server:
+  port: 7003
+
+spring.jpa.hibernate.ddl-auto: update
+
+spring.datasource:
+  url: jdbc:mysql://localhost/recom-db
+  username: user
+  password: pwd
+
+spring.cloud.function.definition: messageProcessor
+
+spring.cloud.stream:
+  defaultBinder: rabbit
+  default.contentType: application/json
+  bindings.messageProcessor-in-0:
+    destination: recommendations
+
+---
+spring.config.activate.on-profile: docker
+server.port: 8080
+
+spring.datasource.url: jdbc:mysql://mysql/recom-db
+
+spring.rabbitmq.host: rabbitmq
+
+spring.cloud.stream.kafka.binder.brokers: kafka
