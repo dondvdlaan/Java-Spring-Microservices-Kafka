@@ -13,10 +13,10 @@ services:
 
   recommendation:
     build: microservices/product-recommendation
-    container_name: recommendation
+    #container_name: recommendation
     mem_limit: 512m
-    ports:
-      - "8081:8080"
+    #ports:
+    #  - "8081:8080"
     environment:
       - SPRING_PROFILES_ACTIVE=docker
     depends_on:
@@ -27,8 +27,6 @@ services:
     build: microservices/product-composite
     container_name: composite
     mem_limit: 512m
-    ports:
-      - "8080:8080"
     environment:
       - SPRING_PROFILES_ACTIVE=docker
 
@@ -74,4 +72,17 @@ services:
       interval: 5s
       timeout: 2s
       retries: 60
+      
+  eureka:
+    build: springcloud/eureka
+    container_name: eureka
+    mem_limit: 512m
 
+  gateway:
+    build: springcloud/gateway
+    container_name: gateway
+    mem_limit: 512m
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    ports:
+      - 8080:8080

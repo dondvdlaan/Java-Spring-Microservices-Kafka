@@ -1,0 +1,40 @@
+server.port: 8080
+
+# virtual host name used by eureka server
+spring.application.name: gateway
+
+eureka-server: localhost
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://${eureka-server}:8761/eureka/
+    initialInstanceInfoReplicationIntervalSeconds: 5
+    registryFetchIntervalSeconds: 5
+  instance:
+    leaseRenewalIntervalInSeconds: 5
+    leaseExpirationDurationInSeconds: 5
+
+spring.cloud.gateway.routes:
+# name of route
+- id: composite
+  # request rote to service name composite in eureka discovery service.
+  # lb:// means "use client load balancer" as declared in GatewayApplication
+  uri: lb://composite
+  predicates:
+  - Path=/composite/**
+  
+---
+spring.config.activate.on-profile: docker
+
+SCHEME: http
+PROD_SERVICE_HOST: product
+PROD_SERVICE_PORT: 8080
+PROD_RECOMMENDATION_HOST: recommendation
+PROD_RECOMMENDATION_PORT: 8080
+
+eureka-server: eureka
+
+spring.rabbitmq.host: rabbitmq
+
+spring.cloud.stream.kafka.binder.brokers: kafka
