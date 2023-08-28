@@ -1,0 +1,93 @@
+server.port: 7000
+
+# Time out on top of the circuit breaker
+resilience4j.timelimiter:
+  instances:
+    cbProduct:
+      timeoutDuration: 3s
+
+# Retries before opening circuit breaker
+resilience4j.retry:
+  instances:
+    cbProduct:
+      # maxAttempts includes the first call
+      maxAttempts: 3
+      # time between retries in ms
+      waitDuration: 1000
+      retryExceptions:
+        - org.springframework.web.reactive.function.client.WebClientResponseException$InternalServerError
+
+# Circuit breaker
+resilience4j.circuitbreaker:
+  instances:
+    cbProduct:
+      # faulty calls counted or elapsed time
+      slidingWindowType: COUNT_BASED
+      # max number of failed calls before opening
+      slidingWindowSize: 4
+      # % of slidingWindowSize ie 100% of 4 = 4; 50% of 4 = 2
+      failureRateThreshold: 100
+      # time to stay open before going to HalfOpenState
+      waitDurationInOpenState: 3000
+      # number of error free calls before closing again
+      permittedNumberOfCallsInHalfOpenState: 2
+      # determines if CB will go to HalfOpenState after waitDurationInOpenState is over
+      automaticTransitionFromOpenToHalfOpenEnabled: true
+
+
+SCHEME: http
+PROD_SERVICE_HOST: localhost
+PROD_SERVICE_PORT: 7001
+PROD_RECOMMENDATION_HOST: localhost
+PROD_RECOMMENDATION_PORT: 7003
+
+# virtual host name used by eureka server
+spring.application.name: composite
+
+eureka-server: localhost
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://${eureka-server}:8761/eureka/
+    initialInstanceInfoReplicationIntervalSeconds: 5
+    registryFetchIntervalSeconds: 5
+  instance:
+    leaseRenewalIntervalInSeconds: 5
+    leaseExpirationDurationInSeconds: 5
+
+spring.cloud.stream:
+  defaultBinder: rabbit
+  default.contentType: application/json
+  bindings:
+    products-out-0:
+      destination: products
+      producer:
+        required-groups: auditGroup
+    recommendations-out-0:
+      destination: recommendations
+      producer:
+        required-groups: auditGroup
+
+---
+spring.config.activate.on-profile: docker
+server.port: 8080
+
+SCHEME: http
+PROD_SERVICE_HOST: product
+PROD_SERVICE_PORT: 8080
+PROD_RECOMMENDATION_HOST: recommendation
+PROD_RECOMMENDATION_PORT: 8080
+
+eureka-server: eureka
+
+spring.rabbitmq.host: rabbitmq
+
+spring.cloud.stream.kafka.binder.brokers: kafka
+
+---
+spring.config.activate.on-profile: kafka
+
+spring.cloud.stream.defaultBinder: kafka
+spring.kafka.bootstrap-servers: kafka:9092
+#spring.cloud.stream.kafka.binder.replication-factor: 1
