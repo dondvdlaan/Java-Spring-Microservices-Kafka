@@ -16,12 +16,18 @@ public class ProductCompositeController implements ProductComposite {
     ProductCompositeService productCompositeService;
 
     // ---- Constructor ----
-    @Autowired
+    //@Autowired // Autowire not needed when only 1 constructor is defined
     public ProductCompositeController(ProductCompositeService productCompositeService) {
         this.productCompositeService = productCompositeService;
     }
 
     // ---- Routes ----
+
+    /**
+     * Method to retriev an aggregated product based on product ID
+     * @param prodID
+     * @return
+     */
     public ProductAggregate getProductByID(int prodID){
 
         return productCompositeService.getProductByID(prodID);

@@ -6,6 +6,11 @@ PROD_SERVICE_PORT: 7001
 PROD_RECOMMENDATION_HOST: localhost
 PROD_RECOMMENDATION_PORT: 7003
 
+# Define loggers
+logging:
+  level:
+    root: INFO
+    dev.manyroads: DEBUG
 ---
 spring:
   config:

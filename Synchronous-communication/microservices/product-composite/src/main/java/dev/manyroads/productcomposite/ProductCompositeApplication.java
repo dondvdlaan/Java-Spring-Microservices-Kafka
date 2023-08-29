@@ -1,7 +1,6 @@
 package dev.manyroads.productcomposite;
 
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.actuate.info.Info;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.web.client.RestTemplate;
@@ -13,20 +12,11 @@ public class ProductCompositeApplication {
 		SpringApplication.run(ProductCompositeApplication.class, args);
 	}
 
+	/*
+	Defining RestTemplate type
+	 */
 	@Bean
-	RestTemplate request(){
+	RestTemplate restTemplate(){
 		return new RestTemplate();
 	}
-/*
-	@Bean
-	public OpenApi getOpenApiDocumentation() {
-		return new OpenApi()
-				.info(new Info().title(apiTitle))
-				.description(apiDescription)
-				.version(apiVersion)
-				.contact(new Contact)
-				.build();
-	}
-
- */
 }

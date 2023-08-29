@@ -8,11 +8,9 @@ chmod u+x git_update.sh
 
 #cd idea-IU-231.8109.175/bin
 
-cd ..
 git add .
-git commit -m "Adding Resilient and Kafka"
+git commit -m "Adding Logger and Comments"
 git push Java-Spring-Microservices-Kafka
-cd Spring-Cloud-Resilient-Kafka
 
 
 pwd

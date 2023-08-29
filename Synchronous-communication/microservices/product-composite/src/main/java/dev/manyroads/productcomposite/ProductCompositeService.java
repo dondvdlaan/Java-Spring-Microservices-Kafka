@@ -4,6 +4,8 @@ import dev.manyroads.api.core.productrecommendation.Recommendation;
 import dev.manyroads.api.core.productservice.Product;
 import dev.manyroads.api.productcomposite.ProductAggregate;
 import dev.manyroads.api.productcomposite.ProductComposite;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
@@ -20,19 +22,22 @@ import java.util.List;
 @Component
 public class ProductCompositeService {
 
+    // ---- Logger ----
+    private static final Logger logger = LoggerFactory.getLogger(ProductCompositeService.class);
+
     // ---- Constants ----
-    final String DOUBLE_SLASH = "://";
-    final String COLON = ":";
+    static final String DOUBLE_SLASH = "://";
+    static final String COLON = ":";
 
     // ---- Fields ----
     @Value("${PROD_SERVICE_PORT}")
     String productServicePort;
     @Value("${PROD_SERVICE_HOST}")
     String productServiceHost;
-    String productRecommendationPort;
-    String productRecommendationHost;
-    String scheme;
-    RestTemplate request;
+    final String productRecommendationPort;
+    final String productRecommendationHost;
+    final String scheme;
+    final RestTemplate request;
 
     // ---- Constructor ----
     @Autowired
@@ -51,7 +56,7 @@ public class ProductCompositeService {
 
     // --- Methods ----
     /**
-     * Aggregate Product by retrieving ProductService and ProductRecommndation by prodID
+     * Aggregate Product by retrieving synchronously Product and ProductRecommndation by prodID
      */
     protected ProductAggregate getProductByID(int prodID){
 
@@ -67,7 +72,8 @@ public class ProductCompositeService {
         String productServiceIP = scheme + DOUBLE_SLASH + productServiceHost + COLON + this.productServicePort;
         String productPath = "/product/";
         String productServiceURL = productServiceIP + productPath + prodID;
-        System.out.println("productServiceURL: " + productServiceURL);
+
+        logger.debug("getProductByID -> productServiceURL: {} ", productServiceURL );
 
         try{
             //ResponseEntity<Product> res = request.getForEntity(productServiceURL,Product.class);
@@ -75,7 +81,7 @@ public class ProductCompositeService {
             product = request.getForEntity(productServiceURL,Product.class).getBody();
         }
         catch(HttpClientErrorException ex){
-            System.out.println("Error getProductService:" + ex.getMessage());
+            logger.error("getProductService: {}", ex.getMessage());
         }
 
         /**
@@ -92,7 +98,8 @@ public class ProductCompositeService {
                 recommendationPath +
                 productQuery +
                 prodID;
-        System.out.println("productRecommendationURL: " + productRecommendationURL);
+
+        logger.debug("getProductByID -> productRecommendationURL: {} ", productRecommendationURL );
 
         try{
              recommendations = request.exchange(
@@ -103,7 +110,7 @@ public class ProductCompositeService {
                     .getBody();
         }
         catch(HttpClientErrorException ex){
-            System.out.println("Error getProductRecommendation:" + ex.getMessage());
+            logger.error("getProductRecommendation: {}", ex.getMessage());
         }
         /*
         for(Recommendation r : recommendations){

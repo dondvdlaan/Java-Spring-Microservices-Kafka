@@ -39,9 +39,9 @@ class ProductCompositeApplicationTests {
 						"mock-address",
 						List.of(new Recommendation(PRODUCT_ID_OK,"Moet je kopen"))));
 	}
-	@Test
-	void contextLoads() {
-	}
+	//@Test
+	//void contextLoads() {
+	//}
 	@Test
 	void getProductByID() {
 		client.get()

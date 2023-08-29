@@ -1,5 +1,10 @@
 server.port: 7001
 
+# Define loggers
+logging:
+  level:
+    root: INFO
+    dev.manyroads: DEBUG
 ---
 spring:
   config:

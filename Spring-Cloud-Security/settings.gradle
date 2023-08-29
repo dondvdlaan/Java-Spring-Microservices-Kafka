@@ -1,9 +1,0 @@
-//rootProject.name = 'Java-Spring-Microservices-Kafka'
-include ':microservices:product-composite'
-include ':microservices:product-service'
-include ':microservices:product-recommendation'
-include ':api'
-include ':springcloud:eureka'
-include ':springcloud:gateway'
-include ':springcloud:authorization'
-

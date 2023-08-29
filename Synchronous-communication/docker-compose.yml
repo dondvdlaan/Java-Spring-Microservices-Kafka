@@ -21,6 +21,7 @@ services:
 
   product-composite:
     build: microservices/product-composite
+    container_name: composite
     mem_limit: 512m
     ports:
       - "8080:8080"
