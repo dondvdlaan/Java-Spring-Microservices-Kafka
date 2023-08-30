@@ -22,6 +22,7 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 class ProductCompositeApplicationTests {
 
 	final int PRODUCT_ID_OK = 123;
+	final int PRODUCT_RECOMM_ID_OK = 456;
 
 	@Autowired
 	private WebTestClient client;
@@ -37,7 +38,7 @@ class ProductCompositeApplicationTests {
 						"name",
 						1D,
 						"mock-address",
-						List.of(new Recommendation(PRODUCT_ID_OK,"Moet je kopen"))));
+						List.of(new Recommendation(PRODUCT_ID_OK,PRODUCT_RECOMM_ID_OK,"Moet je kopen"))));
 	}
 	@Test
 	void contextLoads() {

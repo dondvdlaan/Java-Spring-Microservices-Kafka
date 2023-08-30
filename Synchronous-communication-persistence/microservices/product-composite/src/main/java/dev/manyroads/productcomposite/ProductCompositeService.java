@@ -25,13 +25,14 @@ public class ProductCompositeService {
     final String COLON = ":";
 
     // ---- Fields ----
-    String productServicePort;
-    String productServiceHost;
-    String productRecommendationPort;
-    String productRecommendationHost;
-    String scheme;
-    String productServiceIP;
-    RestTemplate request;
+    final String productServicePort;
+    final String productServiceHost;
+    final String productRecommendationPort;
+    final String productRecommendationHost;
+    final String scheme;
+    final String productServiceIP;
+    final String recommendationIP;
+    final RestTemplate request;
 
     // ---- Constructor ----
     @Autowired
@@ -54,6 +55,7 @@ public class ProductCompositeService {
         this.productServiceHost         = productServiceHost;
         this.scheme = scheme;
         this.productServiceIP = scheme + DOUBLE_SLASH + productServiceHost + COLON + this.productServicePort;
+        this.recommendationIP = scheme + DOUBLE_SLASH + productRecommendationHost + COLON + this.productRecommendationPort;
         this.request = request;
     }
 
@@ -138,23 +140,29 @@ public class ProductCompositeService {
      * @param product
      * @return
      */
-    public ResponseEntity<Product> addProduct(Product product){
+    public ResponseEntity addProduct(ProductAggregate product){
 
         /**
-         * Compose URI
+         * Compose URI for product-service
          * Example http://localhost:7001/addProduct
          */
         String productPath = "/addProduct";
         String productServiceURL = productServiceIP + productPath;
         System.out.println("productServiceURL: " + productServiceURL);
+
+        Product newProduct = new Product(
+                product.getProdID(),
+                product.getProdDesc(),
+                product.getProdWeight(),
+                product.getTrackingID());
         Product savedProd = new Product();
 
         try{
-                    savedProd = request.postForObject(
+            savedProd = request.postForObject(
                     productServiceURL,
-                    product,
+                    newProduct,
                     Product.class
-            );
+                    );
 
             System.out.println("ProductCompositeService savedProd: " + savedProd);
         }
@@ -163,8 +171,49 @@ public class ProductCompositeService {
         }
         catch(Exception ex){
             System.out.println("Alg Foutje communicatie met ProductService: " + ex.getMessage());
+            return ResponseEntity.internalServerError().body(ex.getMessage());
         }
 
-        return ResponseEntity.ok().body(savedProd);
+        /**
+         * Compose URI for recommendation
+         * Example http://localhost:7003/addRecommendations
+         */
+        String recommendationPath = "/addRecommendations";
+        String recommendationURL = recommendationIP + recommendationPath;
+        System.out.println("recommendationURL: " + recommendationURL);
+
+        List<Recommendation> recommendations = product.getRecommendations();
+
+        try{
+            recommendations.stream().map(r->
+            request.postForObject(
+                    recommendationURL,
+                    r,
+                    String.class
+            )
+            ).forEach(rv -> System.out.println("ReturnValue: " + rv));
+            /*
+            for(Recommendation r: recommendations){
+
+                System.out.println("Recommendation to be saved: " + r);
+                Recommendation savedRecommendation = new RestTemplate().postForObject(
+                        recommendationURL,
+                        r,
+                        Recommendation.class
+                );
+                System.out.println("ProductCompositeService saved Recommendation: " + savedRecommendation);
+            }
+            */
+        }
+        catch(HttpClientErrorException ex){
+            System.out.println("Foutje communicatie met ProductRecommendation: " + ex.getMessage());
+            return ResponseEntity.internalServerError().body(ex.getMessage());
+        }
+        catch(Exception ex){
+            System.out.println("Alg Foutje communicatie met ProductRecommendation: " + ex.getMessage());
+            return ResponseEntity.internalServerError().body(ex.getMessage());
+        }
+
+        return ResponseEntity.ok().body("Product added");
     }
 }

@@ -9,6 +9,8 @@ Summary:
 - Java 17
 - Spring Boot
 - Docker
+- Gradle
 
 Testing:
+- start the project with ". docker_up.sh"
 - type in "http://localhost:8080/composite/12" at your browser and the response will be a JSON aggregated product

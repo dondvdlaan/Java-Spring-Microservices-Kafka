@@ -29,9 +29,9 @@ public class ProductCompositeController implements ProductComposite {
         return productCompositeService.getProductByID(prodID);
     }
 
-    public ResponseEntity addProduct(@RequestBody Product product){
+    public ResponseEntity addProduct(@RequestBody ProductAggregate product){
 
-        System.out.println("Product: " + product);
+        System.out.println("addProduct, Product: " + product);
         return productCompositeService.addProduct(product);
     };
 }

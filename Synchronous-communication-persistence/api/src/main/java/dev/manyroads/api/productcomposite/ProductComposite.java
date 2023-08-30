@@ -15,8 +15,8 @@ public interface ProductComposite {
     )
     public ProductAggregate getProductByID(@PathVariable int prodID);
 
-    @PostMapping(value = "/addProduct",
+    @PostMapping(value = "/composite/addProduct",
             produces = "application/json"
     )
-    public ResponseEntity addProduct(@RequestBody Product product);
+    public ResponseEntity addProduct(@RequestBody ProductAggregate product);
 }

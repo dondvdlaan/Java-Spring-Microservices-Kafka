@@ -7,3 +7,11 @@
   "prodWeight": 15,
   "trackingID": "<nothingToSeeHere>"
 }'
+
+- curl -X 'POST'   'http://localhost:8080/composite/addProduct'   -H 'Content-Type: application/json'   -d '{
+  "prodID": 40, "prodDesc": "Vierkante erwten", "prodWeight": 15, "trackingID": "<nothingToSeeHere>",
+  "recommendations": [{"prodID": 40, "recommID": 1, "recommendation": "Very good", "trackingID": "noTracking"},
+{"prodID": 40, "recommID": 2, "recommendation": "Mooi mooi", "trackingID": "weerNoTracking"}
+]}'
+
+- http://localhost:8080/composite/40
