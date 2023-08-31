@@ -50,7 +50,7 @@ public class ProductServiceController implements ProductService {
             //        product.subscribe(System.out::println);
 
             // Simulation of slow response to trigger Circuit breaker in ProductCompositeService
-            //sleep(2000);
+            //sleep(4000);
         }catch (Exception ex){
             System.out.println("Foutje in ophalen Product/ProductServiceController: " + ex.getMessage() );
         }
