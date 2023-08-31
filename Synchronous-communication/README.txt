@@ -8,6 +8,7 @@ No data persistences have been added and data is stored in memory.
 Summary:
 - Java 17
 - Spring Boot
+- REST
 - Docker
 - Gradle
 

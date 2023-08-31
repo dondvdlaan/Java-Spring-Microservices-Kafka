@@ -19,6 +19,10 @@ spring.cloud.stream:
       producer:
         required-groups: auditGroup
 
+logging:
+  level:
+    root: INFO
+    dev.manyroads: DEBUG
 ---
 spring.config.activate.on-profile: docker
 server.port: 8080

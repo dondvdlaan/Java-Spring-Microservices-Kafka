@@ -1,6 +1,6 @@
-JAVA SPRING MICROSERVICES with SYNCHRONOUS Communication and PERSISTENCE databases
+JAVA SPRING MICROSERVICES CLOUD
 
-This project consists of 3 same microservices (product-composite, product-recommendation and product-service) 
+This project consists of 3 microservices (product-composite, product-recommendation and product-service) 
 and general directory (api) for interfaces and models. 
 
 For the storage of the product, a MongoDB has been added to microservice product-service and 
@@ -9,7 +9,6 @@ a MySQL database to microservice product-recommendation.
 Summary:
 - Java 17
 - Spring Boot
-- REST
 - MongoDB and MySQL
 - mapstruct mapper
 - Docker

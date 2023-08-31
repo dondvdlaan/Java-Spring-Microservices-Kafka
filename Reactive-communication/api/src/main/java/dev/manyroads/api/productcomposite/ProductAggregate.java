@@ -28,4 +28,11 @@ public class ProductAggregate extends Product {
     public void setRecommendations(List<Recommendation> recommendations) {
         this.recommendations = recommendations;
     }
+
+    @Override
+    public String toString() {
+        return "ProductAggregate{" +
+                "recommendations=" + recommendations +
+                '}';
+    }
 }

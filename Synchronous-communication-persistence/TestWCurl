@@ -8,6 +8,16 @@
   "trackingID": "<nothingToSeeHere>"
 }'
 
+- curl -X 'POST' \
+  'http://localhost:8080/addRecommendation' \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "prodID": 20,
+  "recomID": 30,
+  "recomDescription": "Heel goed",
+  "trackingID": "<weerNothingToSeeHere>"
+}'
+
 - curl -X 'POST'   'http://localhost:8080/composite/addProduct'   -H 'Content-Type: application/json'   -d '{
   "prodID": 40, "prodDesc": "Vierkante erwten", "prodWeight": 15, "trackingID": "<nothingToSeeHere>",
   "recommendations": [{"prodID": 40, "recommID": 1, "recommendation": "Very good", "trackingID": "noTracking"},
@@ -15,3 +25,9 @@
 ]}'
 
 - http://localhost:8080/composite/40
+
+- curl -X 'POST'   'http://localhost:8080/addProductAggregate'   -H 'Content-Type: application/json'   -d '{
+  "prodID": 40, "prodDesc": "Vierkante erwten", "prodWeight": 15, "trackingID": "<nothingToSeeHere>",
+  "recommendations": [{"prodID": 40, "recomID": 1, "recomDescription": "Very good", "trackingID": "noTracking"},
+{"prodID": 40, "recomID": 2, "recomDescription": "Mooi mooi", "trackingID": "weerNoTracking"}
+]}'
