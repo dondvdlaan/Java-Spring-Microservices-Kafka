@@ -4,26 +4,18 @@ import dev.manyroads.api.core.productrecommendation.Recommendation;
 import dev.manyroads.api.core.productservice.Product;
 import dev.manyroads.api.event.Event;
 import dev.manyroads.api.productcomposite.ProductAggregate;
-import dev.manyroads.api.productcomposite.ProductComposite;
 import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.github.resilience4j.retry.annotation.Retry;
 import io.github.resilience4j.timelimiter.annotation.TimeLimiter;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.stream.function.StreamBridge;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.ResponseExtractor;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
 
@@ -77,11 +69,10 @@ public class ProductCompositeService {
         this.productServiceHost         = productServiceHost;
         this.scheme = scheme;
         this.productServiceIP = scheme + DOUBLE_SLASH + productServiceHost;
-        //this.productServiceIP = scheme + DOUBLE_SLASH + productServiceHost + COLON + this.productServicePort;
         this.request = request;
         this.streamBridge = streamBridge;
         this.publishEventScheduler = publishEventScheduler;
-        // All concurrent requests can now be made savely by the webclient(inmutable)
+        // All concurrent requests can now be made safely by the webclient(inmutable)
         this.webClient = webClientBuilder.build();
     }
 
@@ -105,7 +96,6 @@ public class ProductCompositeService {
 
         /*
          Compose URI
-         Example http://localhost:7001/product/123
          */
         String productPath = "/product/";
         String productServiceURL = productServiceIP + productPath + prodID;
@@ -119,7 +109,6 @@ public class ProductCompositeService {
 
         // Compose URI
         String productRecommendationIP = scheme + DOUBLE_SLASH + productRecommendationHost;
-        //String productRecommendationIP = scheme + DOUBLE_SLASH + productRecommendationHost + COLON + productRecommendationPort;
         String recommendationPath = "/recommendation";
         String productQuery = "?prodID=";
         String productRecommendationURL =
@@ -132,8 +121,6 @@ public class ProductCompositeService {
         /*
          Prepare WebClient and return type ProductAggregate
          */
-        //WebClient webClient1 = webClient.get().uri(productServiceURL);
-        //WebClient webClient2 = WebClient.create(productRecommendationURL);
         Mono<ProductAggregate> monoProductAggregate = Mono.empty();
 
         try{
@@ -176,8 +163,9 @@ public class ProductCompositeService {
 
     /*
     Fallback method is invoked when CallNotPermittedException ex is thrown.
-    CallNotPermittedException ex is thrown when CB is OPEN and new calls coming in for ProductAggregate
-    Fallback method returns  fallback ProductAggregate
+    CallNotPermittedException ex is thrown when CB is in position OPEN and
+    new calls coming in for method getProdByID.
+    Fallback method returns a fallback ProductAggregate
      */
     private Mono<ProductAggregate> getFallbackProduct(int prodID, CallNotPermittedException ex){
 
@@ -196,82 +184,6 @@ public class ProductCompositeService {
         return Mono.just(pa);
     }
 
-    /**
-     * Aggregate Product by synchroneously(RestTemplate) retrieving ProductService and ProductRecommndation
-     * by prodID
-     */
-
-    protected ProductAggregate getProductByID(int prodID){
-
-        /**
-         * Get Product from ProductService by prodID
-         */
-        Product product = new Product();
-
-        /**
-         * Compose URI
-         * Example http://localhost:7001/product/123
-         */
-        String productPath = "/product/";
-        String productServiceURL = productServiceIP + productPath + prodID;
-        System.out.println("productServiceURL: " + productServiceURL);
-
-        try{
-            //ResponseEntity<Product> res = request.getForEntity(productServiceURL,Product.class);
-            //System.out.println("res.getBody(): " + res.getBody());
-            product = request.getForObject(productServiceURL,Product.class);
-        }
-        catch(HttpClientErrorException ex){
-            System.out.println("HTTP Error getProductService:" + ex.getMessage());
-        }
-        catch(Exception ex){
-            System.out.println("Gen Error getProductService:" + ex.getMessage());
-        }
-
-        /**
-         * Get recommendations from ProductRecommendation by prodID
-         */
-        List<Recommendation> recommendations = new ArrayList<>();
-
-        // Compose URI
-        String productRecommendationIP = scheme + DOUBLE_SLASH + productRecommendationHost + COLON + productRecommendationPort;
-        String recommendationPath = "/recommendation";
-        String productQuery = "?prodID=";
-        String productRecommendationURL =
-                productRecommendationIP +
-                recommendationPath +
-                productQuery +
-                prodID;
-        System.out.println("productRecommendationURL: " + productRecommendationURL);
-
-        try{
-             recommendations = request.exchange(
-                            productRecommendationURL,
-                            HttpMethod.GET,
-                            null,
-                            new ParameterizedTypeReference<List<Recommendation>>() {} )
-                    .getBody();
-        }
-        catch(HttpClientErrorException ex){
-            System.out.println("Error getProductRecommendation:" + ex.getMessage());
-        }
-        /*
-        for(Recommendation r : recommendations){
-            System.out.println("r: " + r);
-        }
-                 */
-        /**
-         * Aggregate product and recommendations
-         */
-        ProductAggregate productAggregate = new ProductAggregate();
-        productAggregate.setProdID(product.getProdID());
-        productAggregate.setProdDesc(product.getProdDesc());
-        productAggregate.setProdWeight(product.getProdWeight());
-        productAggregate.setTrackingID(product.getTrackingID());
-        productAggregate.setRecommendations(recommendations);
-
-        return productAggregate;
-    }
     /**
      * Contact with Product Service microservice to store product in MongoDB
      * Asynchronuos Message-Event streaming is used
