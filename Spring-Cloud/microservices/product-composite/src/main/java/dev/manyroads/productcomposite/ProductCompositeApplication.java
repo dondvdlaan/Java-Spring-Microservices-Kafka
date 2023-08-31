@@ -37,7 +37,7 @@ public class ProductCompositeApplication {
 	/*
 	To be able to look up microservices available through the Eureka server, a WebClient.Builder is
 	created including the Spring Loadbalancer. Type WebClient.Builder is used in ProductCompositeService
-	to construct the property webClient.
+	to construct the property webClient in ProductCompositeService.
 	 */
 	@Bean
 	@LoadBalanced

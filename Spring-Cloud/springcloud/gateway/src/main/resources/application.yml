@@ -21,10 +21,12 @@ spring.cloud.gateway.routes:
   # request rote to service name composite in eureka discovery service.
   # lb:// means "use client load balancer" as declared in GatewayApplication
   uri: lb://composite
+  # Path shall be as follows
   predicates:
   - Path=/composite/**
   
 ---
+# When following Spring profile is chosen, underneath definition apply
 spring.config.activate.on-profile: docker
 
 SCHEME: http

@@ -9,3 +9,11 @@ curl -X 'POST' \
   -H 'Content-Type: application/json' \
   -d '{
   "prodID": 40, "recomID": 41, "recomDescription": "Mooiste erwten van de stad", "trackingID": "<nothingToSeeHere>"}'
+
+http://localhost:8080/composite/40
+
+- curl -X 'POST'   'http://localhost:8080/composite/addProduct'   -H 'Content-Type: application/json'   -d '{
+  "prodID": 40, "prodDesc": "Vierkante erwten", "prodWeight": 15, "trackingID": "<nothingToSeeHere>",
+  "recommendations": [{"prodID": 40, "recomID": 1, "recomDescription": "Very good", "trackingID": "noTracking"},
+{"prodID": 40, "recomID": 2, "recomDescription": "Mooi mooi", "trackingID": "weerNoTracking"}
+]}'

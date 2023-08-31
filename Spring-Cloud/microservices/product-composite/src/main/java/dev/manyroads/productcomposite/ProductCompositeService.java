@@ -5,6 +5,8 @@ import dev.manyroads.api.core.productservice.Product;
 import dev.manyroads.api.event.Event;
 import dev.manyroads.api.productcomposite.ProductAggregate;
 import dev.manyroads.api.productcomposite.ProductComposite;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.stream.function.StreamBridge;
@@ -18,6 +20,7 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.ResponseExtractor;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
 
@@ -25,9 +28,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static dev.manyroads.api.event.Event.Type.CREATE;
+import static reactor.core.publisher.Flux.empty;
 
 @Component
 public class ProductCompositeService {
+
+    // ---- Logger ----
+    final static Logger logger = LoggerFactory.getLogger(ProductCompositeService.class);
 
     // ---- Constants ----
     final String DOUBLE_SLASH = "://";
@@ -71,8 +78,11 @@ public class ProductCompositeService {
         this.productServicePort         = productServicePort;
         this.productServiceHost         = productServiceHost;
         this.scheme = scheme;
+        /*
+        To communicate with the Eureka Discovery, a base URL with a virtual hostname is composed.
+        This virtual hostname is previously used by the microservice to register itself at Eureka
+         */
         this.productServiceIP = scheme + DOUBLE_SLASH + productServiceHost;
-        //this.productServiceIP = scheme + DOUBLE_SLASH + productServiceHost + COLON + this.productServicePort;
         this.request = request;
         this.streamBridge = streamBridge;
         this.publishEventScheduler = publishEventScheduler;
@@ -81,7 +91,6 @@ public class ProductCompositeService {
     }
 
     // --- Methods ----
-    // TEST
     protected Mono<ProductAggregate> getProdByID(int prodID){
 
         /**
@@ -91,7 +100,7 @@ public class ProductCompositeService {
 
         /**
          * Compose URI
-         * Example http://localhost:7001/product/123
+         * Example virtual Eureka host: http://product/product/40
          */
         String productPath = "/product/";
         String productServiceURL = productServiceIP + productPath + prodID;
@@ -100,12 +109,14 @@ public class ProductCompositeService {
         /**
          * Get recommendations from ProductRecommendation by prodID
          */
-        Mono<List<Recommendation>> monoRecommendations = Mono.empty();
+        //Flux<Recommendation> fluxRecommendations = Flux.empty();
         List<Recommendation> recommendations = new ArrayList<>();
 
-        // Compose URI
+        /*
+        Compose URI
+        Example virtual Eureka host: http://recommendation/recommendation?prodID=40
+         */
         String productRecommendationIP = scheme + DOUBLE_SLASH + productRecommendationHost;
-        //String productRecommendationIP = scheme + DOUBLE_SLASH + productRecommendationHost + COLON + productRecommendationPort;
         String recommendationPath = "/recommendation";
         String productQuery = "?prodID=";
         String productRecommendationURL =
@@ -118,8 +129,6 @@ public class ProductCompositeService {
         /**
          * Prepare WebClient and return type ProductAggregate
          */
-        //WebClient webClient1 = webClient.get().uri(productServiceURL);
-        //WebClient webClient2 = WebClient.create(productRecommendationURL);
         Mono<ProductAggregate> monoProductAggregate = Mono.empty();
 
         try{
@@ -128,18 +137,22 @@ public class ProductCompositeService {
                     .get()
                     .uri(productServiceURL)
                     .retrieve()
-                    .bodyToMono(Product.class);
+                    .bodyToMono(Product.class)
+                    .doOnError(err -> logger.error("Failure retrieving product:{}", err.getMessage()))
+                    ;
 
-            monoRecommendations = webClient
+            Flux<Recommendation> fluxRecommendations = webClient
                     .get()
                     .uri(productRecommendationURL)
                     .retrieve()
                     .bodyToFlux(Recommendation.class)
-                    .collectList();
+                    // Return empty result in case of failure to retrieve recommendations
+                    .onErrorResume(err -> empty() )
+                    ;
 
-            monoRecommendations.subscribe(System.out::println);
+            fluxRecommendations.subscribe(System.out::println);
 
-            monoProductAggregate = Mono.zip(monoProduct, monoRecommendations, (p, r)->{
+            monoProductAggregate = Mono.zip(monoProduct, fluxRecommendations.collectList(), (p, r)->{
 
                         ProductAggregate productAggregate = new ProductAggregate();
                         productAggregate.setProdID(p.getProdID());
@@ -157,85 +170,7 @@ public class ProductCompositeService {
             System.out.println("Gen Error getProductService:" + ex.getMessage());
         }
 
-
         return monoProductAggregate;
-    }
-    // END TEST
-
-    /**
-     * Aggregate Product by synchroneously(RestTemplate) retrieving ProductService and ProductRecommndation
-     * by prodID
-     */
-    protected ProductAggregate getProductByID(int prodID){
-
-        /**
-         * Get Product from ProductService by prodID
-         */
-        Product product = new Product();
-
-        /**
-         * Compose URI
-         * Example http://localhost:7001/product/123
-         */
-        String productPath = "/product/";
-        String productServiceURL = productServiceIP + productPath + prodID;
-        System.out.println("productServiceURL: " + productServiceURL);
-
-        try{
-            //ResponseEntity<Product> res = request.getForEntity(productServiceURL,Product.class);
-            //System.out.println("res.getBody(): " + res.getBody());
-            product = request.getForObject(productServiceURL,Product.class);
-        }
-        catch(HttpClientErrorException ex){
-            System.out.println("HTTP Error getProductService:" + ex.getMessage());
-        }
-        catch(Exception ex){
-            System.out.println("Gen Error getProductService:" + ex.getMessage());
-        }
-
-        /**
-         * Get recommendations from ProductRecommendation by prodID
-         */
-        List<Recommendation> recommendations = new ArrayList<>();
-
-        // Compose URI
-        String productRecommendationIP = scheme + DOUBLE_SLASH + productRecommendationHost + COLON + productRecommendationPort;
-        String recommendationPath = "/recommendation";
-        String productQuery = "?prodID=";
-        String productRecommendationURL =
-                productRecommendationIP +
-                recommendationPath +
-                productQuery +
-                prodID;
-        System.out.println("productRecommendationURL: " + productRecommendationURL);
-
-        try{
-             recommendations = request.exchange(
-                            productRecommendationURL,
-                            HttpMethod.GET,
-                            null,
-                            new ParameterizedTypeReference<List<Recommendation>>() {} )
-                    .getBody();
-        }
-        catch(HttpClientErrorException ex){
-            System.out.println("Error getProductRecommendation:" + ex.getMessage());
-        }
-        /*
-        for(Recommendation r : recommendations){
-            System.out.println("r: " + r);
-        }
-                 */
-        /**
-         * Aggregate product and recommendations
-         */
-        ProductAggregate productAggregate = new ProductAggregate();
-        productAggregate.setProdID(product.getProdID());
-        productAggregate.setProdDesc(product.getProdDesc());
-        productAggregate.setProdWeight(product.getProdWeight());
-        productAggregate.setTrackingID(product.getTrackingID());
-        productAggregate.setRecommendations(recommendations);
-
-        return productAggregate;
     }
 
     /**

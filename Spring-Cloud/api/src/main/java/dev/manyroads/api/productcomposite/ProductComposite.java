@@ -19,16 +19,14 @@ public interface ProductComposite {
 
     @GetMapping(
             value = "/composite/{prodID}",
-            //consumes = "application/json",
             produces = "application/json"
     )
     public Mono<ProductAggregate> getProductByID(@PathVariable int prodID);
-    //public ProductAggregate getProductByID(@PathVariable int prodID);
 
     @PostMapping(value = "/composite/addProduct",
             produces = "application/json"
     )
-    public Mono<Product> addProduct(@RequestBody Product product);
+    public Mono<Void> addProduct(@RequestBody ProductAggregate product);
 
     @PostMapping(value = "/addRecommendation",
             produces = "application/json"

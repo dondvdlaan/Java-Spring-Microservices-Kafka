@@ -11,6 +11,7 @@ chmod u+x docker_up.sh
 #./gradlew build --info
 ./gradlew build -x test
 docker compose build
+# Spinning up 3 recommendation instances
 docker compose up -d --scale recommendation=3
 docker ps -a
 
